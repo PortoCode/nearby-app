@@ -6,13 +6,11 @@
 import Foundation
 import UIKit
 
-class SplashViewController: UIViewController {
-    let contentView: SplashView
-    weak var delegate: SplashFlowDelegate?
+class WelcomeViewController: UIViewController {
+    let contentView: WelcomeView
     
-    init(contentView: SplashView, delegate: SplashFlowDelegate) {
+    init(contentView: WelcomeView) {
         self.contentView = contentView
-        self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -23,23 +21,15 @@ class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        decideFlow()
     }
     
     private func setup() {
         self.view.addSubview(contentView)
-        self.navigationController?.navigationBar.isHidden = true
-        self.view.backgroundColor = Colors.greenLight
+        view.backgroundColor = Colors.gray100
         setupConstraints()
     }
     
     private func setupConstraints() {
         self.setupContentViewToViewController(contentView: contentView)
-    }
-    
-    private func decideFlow() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            self?.delegate?.decideNavigationFlow()
-        }
     }
 }
