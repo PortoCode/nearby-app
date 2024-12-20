@@ -102,20 +102,20 @@ class HomeView: UIView {
             mapView.trailingAnchor.constraint(equalTo: trailingAnchor),
             mapView.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.65),
             
-            filterScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 48),
-            filterScrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            filterScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 80),
+            filterScrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
             filterScrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            filterScrollView.heightAnchor.constraint(equalToConstant: 86),
+            filterScrollView.heightAnchor.constraint(equalTo: filterStackView.heightAnchor),
             
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             
             filterStackView.topAnchor.constraint(equalTo: filterScrollView.topAnchor),
-            filterStackView.leadingAnchor.constraint(equalTo: filterScrollView.leadingAnchor),
-            filterStackView.trailingAnchor.constraint(equalTo: filterScrollView.trailingAnchor),
+            filterStackView.leadingAnchor.constraint(equalTo: filterScrollView.leadingAnchor, constant: 24),
+            filterStackView.trailingAnchor.constraint(equalTo: filterScrollView.trailingAnchor, constant: -24),
             filterStackView.bottomAnchor.constraint(equalTo: filterScrollView.bottomAnchor),
-            filterStackView.heightAnchor.constraint(equalTo: filterScrollView.heightAnchor)
+            filterStackView.heightAnchor.constraint(equalToConstant: 40)
         ])
         
         containerTopConstraint = containerView.topAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -16)
@@ -127,11 +127,11 @@ class HomeView: UIView {
             dragIndicatorView.widthAnchor.constraint(equalToConstant: 80),
             dragIndicatorView.heightAnchor.constraint(equalToConstant: 4),
             
-            descriptionLabel.topAnchor.constraint(equalTo: dragIndicatorView.bottomAnchor, constant: 16),
+            descriptionLabel.topAnchor.constraint(equalTo: dragIndicatorView.bottomAnchor, constant: 24),
             descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
             descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -24),
             
-            placesTableView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 16),
+            placesTableView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 12),
             placesTableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
             placesTableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -24),
             placesTableView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
@@ -192,9 +192,6 @@ class HomeView: UIView {
         button.imageView?.heightAnchor.constraint(equalToConstant: 16).isActive = true
         button.imageView?.widthAnchor.constraint(equalToConstant: 16).isActive = true
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 8)
-        
-        filterStackView.isLayoutMarginsRelativeArrangement = true
-        filterStackView.layoutMargins = UIEdgeInsets(top: 2, left: 0, bottom: 2, right: 0)
         
         return button
     }
