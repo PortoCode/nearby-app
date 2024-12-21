@@ -44,7 +44,7 @@ class WelcomeView: UIView {
     
     private let tipsStackView: UIStackView = {
         let stackView = UIStackView()
-        stackView.spacing = 16
+        stackView.spacing = 24
         stackView.axis = .vertical
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
@@ -56,11 +56,16 @@ class WelcomeView: UIView {
         button.backgroundColor = Colors.greenBase
         button.titleLabel?.font = Typography.action
         button.setTitleColor(Colors.gray100, for: .normal)
-        button.layer.cornerRadius = 8
+        button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(didTap), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    @objc
+    private func didTap() {
+        didTapButton?()
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -80,11 +85,6 @@ class WelcomeView: UIView {
         addSubview(tipsStackView)
         addSubview(startButton)
         setupConstraints()
-    }
-    
-    @objc
-    private func didTap() {
-        didTapButton?()
     }
     
     private func setupTips() {
