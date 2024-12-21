@@ -81,10 +81,10 @@ class PlaceTableViewCell: UITableViewCell {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            containerView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
             
             itemImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
             itemImageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
