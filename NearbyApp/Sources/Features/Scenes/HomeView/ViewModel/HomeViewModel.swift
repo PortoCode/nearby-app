@@ -20,7 +20,6 @@ class HomeViewModel {
     func fetchInitialData(completion: @escaping ([Category]) -> Void) {
         fetchCategories { categories in
             completion(categories)
-            print(categories)
             if let foodCategory = categories.first(where: { $0.name == "Alimentação" }) {
                 self.fetchPlaces(for: foodCategory.id, userLocation: CLLocationCoordinate2D(latitude: self.userLatitude, longitude: self.userLongitude))
             }

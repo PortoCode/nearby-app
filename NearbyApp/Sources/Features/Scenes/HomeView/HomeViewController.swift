@@ -9,6 +9,7 @@ import MapKit
 
 class HomeViewController: UIViewController {
     private var places: [Place] = []
+    private var selectedCategory: Category?
     private let homeView = HomeView()
     private var homeViewModel = HomeViewModel()
     
@@ -54,6 +55,7 @@ class HomeViewController: UIViewController {
     private func filterPlaces(by category: Category) {
         let currentCenter = homeView.mapView.region.center
         homeViewModel.fetchPlaces(for: category.id, userLocation: currentCenter)
+        self.selectedCategory = category
     }
 }
 
@@ -81,6 +83,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         
         let details = DetailsViewController()
         details.place = places[indexPath.row]
+        details.categoryName = selectedCategory?.name
         navigationController?.pushViewController(details, animated: true)
     }
 }

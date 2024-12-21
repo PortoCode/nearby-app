@@ -7,7 +7,8 @@ import Foundation
 import UIKit
 
 class DetailsViewController: UIViewController {
-    var place : Place?
+    var place: Place?
+    var categoryName: String?
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -32,6 +33,13 @@ class DetailsViewController: UIViewController {
         label.font = Typography.titleLG
         label.textColor = Colors.gray600
         return label
+    }()
+    
+    private let categoryImageView: UIImageView = {
+        let image = UIImageView()
+        image.contentMode = .scaleAspectFit
+        image.tintColor = Colors.greenBase
+        return image
     }()
     
     private let descriptionLabel: UILabel = {
@@ -184,6 +192,7 @@ class DetailsViewController: UIViewController {
         contentView.addSubview(containerView)
         
         containerView.addSubview(titleLabel)
+        containerView.addSubview(categoryImageView)
         containerView.addSubview(descriptionLabel)
         containerView.addSubview(infoTitleLabel)
         containerView.addSubview(infoStackView)
@@ -209,6 +218,7 @@ class DetailsViewController: UIViewController {
         coverImageView.translatesAutoresizingMaskIntoConstraints = false
         containerView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        categoryImageView.translatesAutoresizingMaskIntoConstraints = false
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         infoTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         infoStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -246,6 +256,11 @@ class DetailsViewController: UIViewController {
             
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 32),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
+            
+            categoryImageView.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 12),
+            categoryImageView.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            categoryImageView.widthAnchor.constraint(equalToConstant: 24),
+            categoryImageView.heightAnchor.constraint(equalToConstant: 24),
             
             descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
             
@@ -316,6 +331,15 @@ class DetailsViewController: UIViewController {
         
         titleLabel.text = place.name
         descriptionLabel.text = place.description
+        
+        let categoryIcons: [String: String] = [
+            "Alimentação": "fork.knife",
+            "Compras": "cart",
+            "Hospedagem": "bed.double",
+            "Padaria": "cup.and.saucer"
+        ]
+        let iconName = categoryIcons[categoryName ?? "Alimentação"] ?? "questionmark.circle"
+        categoryImageView.image = UIImage(systemName: iconName)
         
         infoStackView.addArrangedSubview(createInfoRow(iconName: "ticket", text: "\(place.coupons) cupons disponíveis"))
         infoStackView.addArrangedSubview(createInfoRow(iconName: "mapIcon", text: place.address))
