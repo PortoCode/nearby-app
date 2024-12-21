@@ -320,25 +320,7 @@ class DetailsViewController: UIViewController {
         infoStackView.addArrangedSubview(createInfoRow(iconName: "ticket", text: "\(place.coupons) cupons disponíveis"))
         infoStackView.addArrangedSubview(createInfoRow(iconName: "mapIcon", text: place.address))
         infoStackView.addArrangedSubview(createInfoRow(iconName: "phone", text: place.phone))
-        
-//        let paragraphStyle = NSMutableParagraphStyle()
-//        paragraphStyle.lineSpacing = 6
-//
-//        let regulationText = """
-//                        • Válido apenas para consumo no local
-//                        • Disponível até 31/12/2024
-//                        """
-//
-//        let attributedText = NSAttributedString(
-//            string: regulationText,
-//            attributes: [
-//                .paragraphStyle: paragraphStyle,
-//                .font: Typography.textSM,
-//                .foregroundColor: Colors.gray500
-//            ]
-//        )
-//        regulationLabel.attributedText = attributedText
-//
+
         couponCodeLabel.text = place.id
         if let url = URL(string: place.cover) {
             URLSession.shared.dataTask(with: url) { data, _, _ in
