@@ -5,6 +5,7 @@
 
 import Foundation
 import UIKit
+import AVFoundation
 
 class DetailsViewController: UIViewController {
     var place: Place?
@@ -181,6 +182,7 @@ class DetailsViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         configureDetails()
+        setupQRCodeButton()
         setupBackButton()
         self.navigationController?.navigationBar.isHidden = true
     }
@@ -202,7 +204,9 @@ class DetailsViewController: UIViewController {
         containerView.addSubview(divider2)
         containerView.addSubview(couponTitleLabel)
         containerView.addSubview(couponStackView)
-        containerView.addSubview(qrCodeButton)
+        
+        scrollView.alwaysBounceVertical = true
+        scrollView.alwaysBounceHorizontal = false
         
         couponStackView.addArrangedSubview(couponCodeLabel)
         infoStackView.axis = .vertical
@@ -210,7 +214,6 @@ class DetailsViewController: UIViewController {
         setupTranslates()
         setupConstraints()
     }
-    
     
     private func setupTranslates() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -227,8 +230,6 @@ class DetailsViewController: UIViewController {
         regulationLabel.translatesAutoresizingMaskIntoConstraints = false
         divider2.translatesAutoresizingMaskIntoConstraints = false
         couponTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        qrCodeButton.translatesAutoresizingMaskIntoConstraints = false
-        
     }
     
     private func setupConstraints() {
@@ -244,7 +245,7 @@ class DetailsViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            coverImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            coverImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             coverImageView.heightAnchor.constraint(equalTo: contentView.heightAnchor, multiplier: 0.4),
             coverImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             coverImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
@@ -252,7 +253,7 @@ class DetailsViewController: UIViewController {
             containerView.topAnchor.constraint(equalTo: coverImageView.bottomAnchor, constant: -20),
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 32),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
@@ -277,19 +278,14 @@ class DetailsViewController: UIViewController {
             
             regulationLabel.topAnchor.constraint(equalTo: regulationTitleLabel.bottomAnchor, constant: 12),
             
-            
             divider2.topAnchor.constraint(equalTo: regulationLabel.bottomAnchor, constant: 16),
             divider2.heightAnchor.constraint(equalToConstant: 1),
-            
             
             couponTitleLabel.topAnchor.constraint(equalTo: divider2.bottomAnchor, constant: 16),
             couponTitleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
             
             couponStackView.topAnchor.constraint(equalTo: couponTitleLabel.bottomAnchor, constant: 12),
-            couponStackView.heightAnchor.constraint(equalToConstant: 40),
-            
-            qrCodeButton.heightAnchor.constraint(equalToConstant: 44),
-            qrCodeButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -32)
+            couponStackView.heightAnchor.constraint(equalToConstant: 40)
         ])
         
         applyLateralContraints(to: descriptionLabel)
@@ -298,7 +294,6 @@ class DetailsViewController: UIViewController {
         applyLateralContraints(to: divider2)
         applyLateralContraints(to: regulationLabel)
         applyLateralContraints(to: couponStackView)
-        applyLateralContraints(to: qrCodeButton)
     }
     
     private func applyLateralContraints(to view: UIView) {
@@ -306,6 +301,81 @@ class DetailsViewController: UIViewController {
             view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
         ])
+    }
+    
+    private func setupQRCodeButton() {
+        containerView.addSubview(qrCodeButton)
+        qrCodeButton.translatesAutoresizingMaskIntoConstraints = false
+        qrCodeButton.isUserInteractionEnabled = true
+        qrCodeButton.addTarget(self, action: #selector(readQRCode), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            qrCodeButton.heightAnchor.constraint(equalToConstant: 44),
+            qrCodeButton.topAnchor.constraint(equalTo: couponStackView.bottomAnchor, constant: 16),
+            qrCodeButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -32),
+            qrCodeButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            qrCodeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24)
+        ])
+    }
+    
+    @objc
+    private func readQRCode() {
+        requestCameraAccess { [weak self] granted in
+            guard granted else {
+                self?.showCameraAccessAlert()
+                return
+            }
+            self?.presentQRCodeScanner()
+        }
+    }
+    
+    func requestCameraAccess(completion: @escaping (Bool) -> Void) {
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            DispatchQueue.main.async {
+                completion(granted)
+            }
+        }
+    }
+    
+    private func showCameraAccessAlert() {
+        let alert = UIAlertController(
+            title: "Acesso à Câmera Negado",
+            message: "Por favor, permita o acesso à câmera nas configurações para usar esta funcionalidade.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: "Abrir Configurações", style: .default) { _ in
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else { return }
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+            }
+        })
+        present(alert, animated: true)
+    }
+    
+    func presentCouponModal(with code: String) {
+        let alertController = UIAlertController(title: "Cupom Detectado", message: "Deseja usar o cupom \(code)?", preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: "Não", style: .cancel))
+        alertController.addAction(UIAlertAction(title: "Sim", style: .default, handler: { _ in
+            self.useCoupon(code: code)
+        }))
+        
+        present(alertController, animated: true)
+    }
+    
+    private func presentQRCodeScanner() {
+        let scannerVC = QRCodeScannerViewController()
+        scannerVC.qrCodeDetected = { [weak self] code in
+            self?.presentCouponModal(with: code)
+        }
+        present(scannerVC, animated: true)
+    }
+    
+    func useCoupon(code: String) {
+        // Reduzir o número de cupons
+        // Atualizar a UI
+        print("Cupom \(code) usado com sucesso!")
     }
     
     private func setupBackButton() {
@@ -344,7 +414,7 @@ class DetailsViewController: UIViewController {
         infoStackView.addArrangedSubview(createInfoRow(iconName: "ticket", text: "\(place.coupons) cupons disponíveis"))
         infoStackView.addArrangedSubview(createInfoRow(iconName: "mapIcon", text: place.address))
         infoStackView.addArrangedSubview(createInfoRow(iconName: "phone", text: place.phone))
-
+        
         couponCodeLabel.text = place.id
         if let url = URL(string: place.cover) {
             URLSession.shared.dataTask(with: url) { data, _, _ in
@@ -369,10 +439,12 @@ class DetailsViewController: UIViewController {
         label.text = text
         label.font = Typography.textSM
         label.textColor = Colors.gray500
+        label.translatesAutoresizingMaskIntoConstraints = false
         
         let stackView = UIStackView(arrangedSubviews: [iconImageView, label])
         stackView.axis = .horizontal
         stackView.spacing = 8
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         return stackView
     }

@@ -19,5 +19,7 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Precisamos de acesso à câmera para ler QR codes.</string>
 </dict>
 </plist>
