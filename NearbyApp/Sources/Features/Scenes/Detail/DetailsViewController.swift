@@ -184,9 +184,12 @@ class DetailsViewController: UIViewController {
         return button
     }()
     
+    private var stateView: UIView = UIView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupStateView()
         configureDetails()
         setupQRCodeButton()
         setupBackButton()
@@ -195,6 +198,7 @@ class DetailsViewController: UIViewController {
     
     private func setupUI() {
         view.addSubview(scrollView)
+        view.backgroundColor = Colors.gray100
         scrollView.addSubview(contentView)
         contentView.addSubview(coverImageView)
         contentView.addSubview(containerView)
@@ -306,6 +310,20 @@ class DetailsViewController: UIViewController {
         NSLayoutConstraint.activate([
             view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+        ])
+    }
+    
+    private func setupStateView() {
+        stateView.isHidden = true
+        stateView.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+        view.addSubview(stateView)
+        
+        stateView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stateView.topAnchor.constraint(equalTo: view.topAnchor),
+            stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            stateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
@@ -429,22 +447,23 @@ class DetailsViewController: UIViewController {
     }
     
     private func showLoadingState() {
+        stateView.isHidden = false
+        stateView.subviews.forEach { $0.removeFromSuperview() } // Limpa qualquer conteúdo anterior
+        
         let loadingIndicator = UIActivityIndicatorView(style: .large)
         loadingIndicator.color = Colors.greenBase
         loadingIndicator.startAnimating()
-        view.addSubview(loadingIndicator)
+        stateView.addSubview(loadingIndicator)
         
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            loadingIndicator.centerXAnchor.constraint(equalTo: stateView.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: stateView.centerYAnchor)
         ])
     }
     
     private func hideLoadingState() {
-        for subview in view.subviews where subview is UIActivityIndicatorView {
-            subview.removeFromSuperview()
-        }
+        stateView.isHidden = true
     }
     
     private func updateUIWithPlace(_ place: Place) {
@@ -490,20 +509,23 @@ class DetailsViewController: UIViewController {
     }
     
     private func showErrorState(with message: String) {
+        stateView.isHidden = false
+        stateView.subviews.forEach { $0.removeFromSuperview() }
+        
         let errorLabel = UILabel()
         errorLabel.text = message
         errorLabel.font = Typography.textMD
         errorLabel.textColor = Colors.redBase
         errorLabel.textAlignment = .center
-        errorLabel.translatesAutoresizingMaskIntoConstraints = false
         errorLabel.numberOfLines = 0
-        view.addSubview(errorLabel)
+        stateView.addSubview(errorLabel)
         
+        errorLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+            errorLabel.centerXAnchor.constraint(equalTo: stateView.centerXAnchor),
+            errorLabel.centerYAnchor.constraint(equalTo: stateView.centerYAnchor),
+            errorLabel.leadingAnchor.constraint(equalTo: stateView.leadingAnchor, constant: 24),
+            errorLabel.trailingAnchor.constraint(equalTo: stateView.trailingAnchor, constant: -24)
         ])
     }
     
