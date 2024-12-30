@@ -93,7 +93,7 @@ extension HomeViewController: MKMapViewDelegate {
         guard !(annotation is MKUserLocation) else { return nil }
         
         let identifier = "CustomPin"
-        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKAnnotationView
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
         
         if annotationView == nil {
             annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
@@ -111,6 +111,6 @@ extension HomeViewController: MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        guard let annotation = view.annotation as? PlaceAnnotation else { return }
+        guard view.annotation is PlaceAnnotation else { return }
     }
 }
