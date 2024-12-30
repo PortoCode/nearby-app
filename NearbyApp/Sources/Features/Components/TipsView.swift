@@ -18,6 +18,7 @@ public class TipsView: UIView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = Typography.titleMD
+        label.textColor = Colors.gray600
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -26,6 +27,7 @@ public class TipsView: UIView {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = Typography.textSM
+        label.textColor = Colors.gray600
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

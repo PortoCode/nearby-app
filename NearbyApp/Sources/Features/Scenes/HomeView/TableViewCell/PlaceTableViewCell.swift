@@ -21,6 +21,7 @@ class PlaceTableViewCell: UITableViewCell {
     let titleLabel: UILabel = {
         let label = UILabel()
         label.font = Typography.titleSM
+        label.textColor = Colors.gray600
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -71,6 +72,7 @@ class PlaceTableViewCell: UITableViewCell {
     
     private func setupUI() {
         addSubview(containerView)
+        backgroundColor = Colors.gray100
         containerView.addSubview(itemImageView)
         containerView.addSubview(titleLabel)
         containerView.addSubview(descriptionLabel)
