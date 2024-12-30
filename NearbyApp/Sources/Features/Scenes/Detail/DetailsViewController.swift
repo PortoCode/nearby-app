@@ -11,6 +11,12 @@ class DetailsViewController: UIViewController {
     var place: Place?
     var categoryName: String?
     
+    private enum ViewState {
+        case loading
+        case loaded(Place)
+        case error(String)
+    }
+    
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
@@ -396,9 +402,52 @@ class DetailsViewController: UIViewController {
         self.navigationController?.popViewController(animated: true)
     }
     
-    private func configureDetails() {
-        guard let place = place else { return }
+    func configureDetails() {
+        updateViewState(.loading)
         
+        guard let place = place else {
+            updateViewState(.error("Erro ao carregar os detalhes do local."))
+            return
+        }
+        
+        updateViewState(.loaded(place))
+    }
+    
+    private func updateViewState(_ state: ViewState) {
+        switch state {
+        case .loading:
+            showLoadingState()
+            
+        case .loaded(let place):
+            hideLoadingState()
+            updateUIWithPlace(place)
+            
+        case .error(let message):
+            hideLoadingState()
+            showErrorState(with: message)
+        }
+    }
+    
+    private func showLoadingState() {
+        let loadingIndicator = UIActivityIndicatorView(style: .large)
+        loadingIndicator.color = Colors.greenBase
+        loadingIndicator.startAnimating()
+        view.addSubview(loadingIndicator)
+        
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+    
+    private func hideLoadingState() {
+        for subview in view.subviews where subview is UIActivityIndicatorView {
+            subview.removeFromSuperview()
+        }
+    }
+    
+    private func updateUIWithPlace(_ place: Place) {
         titleLabel.text = place.name
         descriptionLabel.text = place.description
         
@@ -416,15 +465,46 @@ class DetailsViewController: UIViewController {
         infoStackView.addArrangedSubview(createInfoRow(iconName: "phone", text: place.phone))
         
         couponCodeLabel.text = place.id
-        if let url = URL(string: place.cover) {
-            URLSession.shared.dataTask(with: url) { data, _, _ in
-                if let data = data, let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self.coverImageView.image = image
-                    }
-                }
-            }.resume()
+        loadCoverImage(from: place.cover)
+    }
+    
+    private func loadCoverImage(from urlString: String) {
+        guard let url = URL(string: urlString) else {
+            print("URL inválida para imagem.")
+            return
         }
+        
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            if let error = error {
+                print("Erro ao carregar imagem: \(error.localizedDescription)")
+                return
+            }
+            guard let data = data, let image = UIImage(data: data) else {
+                print("Dados inválidos para a imagem.")
+                return
+            }
+            DispatchQueue.main.async {
+                self?.coverImageView.image = image
+            }
+        }.resume()
+    }
+    
+    private func showErrorState(with message: String) {
+        let errorLabel = UILabel()
+        errorLabel.text = message
+        errorLabel.font = Typography.textMD
+        errorLabel.textColor = Colors.redBase
+        errorLabel.textAlignment = .center
+        errorLabel.translatesAutoresizingMaskIntoConstraints = false
+        errorLabel.numberOfLines = 0
+        view.addSubview(errorLabel)
+        
+        NSLayoutConstraint.activate([
+            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            errorLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+        ])
     }
     
     private func createInfoRow(iconName: String, text: String) -> UIStackView {
