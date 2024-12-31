@@ -472,6 +472,7 @@ class DetailsViewController: UIViewController {
         
         let categoryIcons: [String: String] = [
             "Alimentação": "fork.knife",
+            "Cinema": "popcorn",
             "Compras": "cart",
             "Hospedagem": "bed.double",
             "Padaria": "cup.and.saucer"

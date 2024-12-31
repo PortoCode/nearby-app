@@ -151,6 +151,7 @@ class HomeView: UIView {
     func updateFilterButtons(with categories: [Category], action: @escaping (Category) -> Void) {
         let categoryIcons: [String: String] = [
             "Alimentação": "fork.knife",
+            "Cinema": "popcorn",
             "Compras": "cart",
             "Hospedagem": "bed.double",
             "Padaria": "cup.and.saucer"
