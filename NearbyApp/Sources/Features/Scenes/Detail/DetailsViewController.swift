@@ -377,23 +377,13 @@ class DetailsViewController: UIViewController {
         present(alert, animated: true)
     }
     
-    func presentCouponModal(with code: String) {
-        let alertController = UIAlertController(title: "Cupom Detectado", message: "Deseja usar o cupom \(code)?", preferredStyle: .alert)
-        
-        alertController.addAction(UIAlertAction(title: "Não", style: .cancel))
-        alertController.addAction(UIAlertAction(title: "Sim", style: .default, handler: { _ in
-            self.useCoupon(code: code)
-        }))
-        
-        present(alertController, animated: true)
-    }
-    
     private func presentQRCodeScanner() {
         let scannerVC = QRCodeScannerViewController()
-        scannerVC.qrCodeDetected = { [weak self] code in
-            self?.presentCouponModal(with: code)
+        scannerVC.couponUsed = { [weak self] code in
+            guard let self = self else { return }
+            useCoupon(code: code)
         }
-        present(scannerVC, animated: true)
+        self.navigationController?.pushViewController(scannerVC, animated: true)
     }
     
     func useCoupon(code: String) {

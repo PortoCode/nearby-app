@@ -10,10 +10,16 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
     var captureSession: AVCaptureSession!
     var previewLayer: AVCaptureVideoPreviewLayer!
     var qrCodeDetected: ((String) -> Void)?
+    var couponUsed: ((String) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupCaptureSession()
+        setupUI()
+    }
+    
+    private func setupCaptureSession() {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
             
@@ -60,6 +66,41 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         }
     }
     
+    private func setupUI() {
+        let backButton = UIButton()
+        backButton.backgroundColor = Colors.greenBase
+        backButton.layer.cornerRadius = 8
+        backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+        backButton.layer.zPosition = 1 // Garante que o botão fique na frente da câmera
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(backButton)
+        
+        NSLayoutConstraint.activate([
+            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            backButton.heightAnchor.constraint(equalToConstant: 40),
+            backButton.widthAnchor.constraint(equalToConstant: 40),
+        ])
+        
+        let arrowImage = UIImage(systemName: "arrow.left")?.withRenderingMode(.alwaysTemplate)
+        let arrowImageView = UIImageView(image: arrowImage)
+        arrowImageView.tintColor = Colors.gray100
+        arrowImageView.translatesAutoresizingMaskIntoConstraints = false
+        backButton.addSubview(arrowImageView)
+        
+        NSLayoutConstraint.activate([
+            arrowImageView.centerXAnchor.constraint(equalTo: backButton.centerXAnchor),
+            arrowImageView.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
+            arrowImageView.widthAnchor.constraint(equalToConstant: 20),
+            arrowImageView.heightAnchor.constraint(equalToConstant: 20)
+        ])
+    }
+    
+    @objc
+    private func didTapBackButton() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
@@ -68,9 +109,7 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
             captureSession.stopRunning()
             
             DispatchQueue.main.async { [weak self] in
-                self?.dismiss(animated: true) {
-                    self?.qrCodeDetected?(stringValue)
-                }
+                self?.presentCouponModal(with: stringValue)
             }
         }
     }
@@ -81,5 +120,22 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         if captureSession.isRunning {
             captureSession.stopRunning()
         }
+    }
+    
+    func presentCouponModal(with code: String) {
+        let alertController = UIAlertController(title: "Cupom Detectado", message: "Deseja usar o cupom \(code)?", preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: "Não", style: .cancel, handler: { [weak self] _ in
+            DispatchQueue.global(qos: .userInitiated).async {
+                self?.captureSession.startRunning()
+            }
+        }))
+        
+        alertController.addAction(UIAlertAction(title: "Sim", style: .default, handler: { [weak self] _ in
+            self?.navigationController?.popViewController(animated: true)
+            self?.couponUsed?(code)
+        }))
+        
+        present(alertController, animated: true)
     }
 }
