@@ -11,6 +11,7 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
     var previewLayer: AVCaptureVideoPreviewLayer!
     var qrCodeDetected: ((String) -> Void)?
     var couponUsed: ((String) -> Void)?
+    var highlightLayer: CAShapeLayer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -96,19 +97,17 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         ])
     }
     
-    @objc
-    private func didTapBackButton() {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
                   let stringValue = readableObject.stringValue else { return }
             
-            captureSession.stopRunning()
+            if let transformedObject = previewLayer.transformedMetadataObject(for: readableObject) {
+                drawQRCodeHighlight(bounds: transformedObject.bounds)
+            }
             
-            DispatchQueue.main.async { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.captureSession.stopRunning()
                 self?.presentCouponModal(with: stringValue)
             }
         }
@@ -122,10 +121,58 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         }
     }
     
-    func presentCouponModal(with code: String) {
+    private func drawQRCodeHighlight(bounds: CGRect) {
+        // Remover qualquer highlight anterior
+        highlightLayer?.removeFromSuperlayer()
+        
+        // Ajustar os limites para dar mais espaço entre o contorno e o QR code
+        let padding: CGFloat = 16 // Espaço extra em torno do QR code
+        let expandedBounds = bounds.insetBy(dx: -padding, dy: -padding)
+        
+        // Criar um contorno novo
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.strokeColor = Colors.greenLight.cgColor
+        shapeLayer.lineWidth = 4
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        
+        // Criar os cantos arredondados
+        let path = UIBezierPath()
+        let lineLength: CGFloat = 30
+        
+        // Superior esquerdo
+        path.move(to: CGPoint(x: expandedBounds.minX, y: expandedBounds.minY + lineLength))
+        path.addLine(to: CGPoint(x: expandedBounds.minX, y: expandedBounds.minY))
+        path.addLine(to: CGPoint(x: expandedBounds.minX + lineLength, y: expandedBounds.minY))
+        
+        // Superior direito
+        path.move(to: CGPoint(x: expandedBounds.maxX - lineLength, y: expandedBounds.minY))
+        path.addLine(to: CGPoint(x: expandedBounds.maxX, y: expandedBounds.minY))
+        path.addLine(to: CGPoint(x: expandedBounds.maxX, y: expandedBounds.minY + lineLength))
+        
+        // Inferior direito
+        path.move(to: CGPoint(x: expandedBounds.maxX, y: expandedBounds.maxY - lineLength))
+        path.addLine(to: CGPoint(x: expandedBounds.maxX, y: expandedBounds.maxY))
+        path.addLine(to: CGPoint(x: expandedBounds.maxX - lineLength, y: expandedBounds.maxY))
+        
+        // Inferior esquerdo
+        path.move(to: CGPoint(x: expandedBounds.minX + lineLength, y: expandedBounds.maxY))
+        path.addLine(to: CGPoint(x: expandedBounds.minX, y: expandedBounds.maxY))
+        path.addLine(to: CGPoint(x: expandedBounds.minX, y: expandedBounds.maxY - lineLength))
+        
+        shapeLayer.path = path.cgPath
+        
+        // Adicionar o contorno à visualização
+        view.layer.addSublayer(shapeLayer)
+        highlightLayer = shapeLayer
+    }
+    
+    private func presentCouponModal(with code: String) {
         let alertController = UIAlertController(title: "Cupom Detectado", message: "Deseja usar o cupom \(code)?", preferredStyle: .alert)
         
         alertController.addAction(UIAlertAction(title: "Não", style: .cancel, handler: { [weak self] _ in
+            self?.highlightLayer?.removeFromSuperlayer()
+            self?.highlightLayer = nil
+            
             DispatchQueue.global(qos: .userInitiated).async {
                 self?.captureSession.startRunning()
             }
@@ -137,5 +184,10 @@ class QRCodeScannerViewController: UIViewController, AVCaptureMetadataOutputObje
         }))
         
         present(alertController, animated: true)
+    }
+    
+    @objc
+    private func didTapBackButton() {
+        self.navigationController?.popViewController(animated: true)
     }
 }
